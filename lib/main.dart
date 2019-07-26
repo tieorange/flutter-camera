@@ -10,7 +10,7 @@ import 'package:path_provider/path_provider.dart';
 Future<void> main() async {
   final cameras = await availableCameras();
 
-  final firstCamera = cameras.first;
+  final firstCamera = cameras.elementAt(0);
 
   runApp(
     MaterialApp(
@@ -63,7 +63,15 @@ class CameraState extends State<Camera> {
         future: _initializeControllerFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            return CameraPreview(_controller);
+            return Row(
+              children: <Widget>[
+                CameraPreview(_controller),
+                MaterialButton(
+                  child: Text("take pic"),
+                  onPressed: () => print("clicked"),
+                )
+              ],
+            );
           } else {
             return Center(child: CircularProgressIndicator());
           }
@@ -96,4 +104,3 @@ class CameraState extends State<Camera> {
     );
   }
 }
-
