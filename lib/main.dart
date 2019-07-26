@@ -6,11 +6,13 @@ import 'package:camera_app/display.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
+import 'package:audioplayers/audio_cache.dart';
+
+// TODO add sounds: http://soundbible.com/tags-cat-meow.html
 
 Future<void> main() async {
   final cameras = await availableCameras();
-
-  final firstCamera = cameras.elementAt(0);
+  final firstCamera = cameras.first; // TODO handle both cams
 
   runApp(
     MaterialApp(
@@ -43,10 +45,10 @@ class CameraState extends State<Camera> {
     super.initState();
     _controller = CameraController(
       widget.camera,
-      ResolutionPreset.medium,
+      ResolutionPreset.low,
     );
 
-    _initializeControllerFuture = _controller.initialize();
+    onCameraSelected(widget.camera);
   }
 
   @override
@@ -58,18 +60,16 @@ class CameraState extends State<Camera> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Take a Picture')),
+      appBar: AppBar(title: Text('Take a Picture2')),
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             return Row(
               children: <Widget>[
-                CameraPreview(_controller),
-                MaterialButton(
-                  child: Text("take pic"),
-                  onPressed: () => print("clicked"),
-                )
+                AspectRatio(
+                    aspectRatio: _controller.value.aspectRatio,
+                    child: CameraPreview(_controller))
               ],
             );
           } else {
@@ -101,6 +101,20 @@ class CameraState extends State<Camera> {
           }
         },
       ),
+    );
+  }
+
+  void onCameraSelected(CameraDescription camera) {
+    _initializeControllerFuture = _controller.initialize().then((value) {
+      print("INIT Initialized camera");
+      setState(() {});
+    });
+  }
+
+  MaterialButton buildMaterialButton() {
+    return MaterialButton(
+      child: Text("take pic"),
+      onPressed: () => print("clicked"),
     );
   }
 }
