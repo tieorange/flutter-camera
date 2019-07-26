@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:camera/camera.dart';
 import 'package:camera_app/display.dart';
+import 'package:camera_app/utils/PhotosManager.dart';
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
@@ -41,7 +42,7 @@ class Camera extends StatefulWidget {
 class CameraState extends State<Camera> {
   CameraController _controller;
   Future<void> _initializeControllerFuture;
-  AudioCache player = new AudioCache();
+  AudioCache player = new AudioCache(prefix: "audio/");
 
   @override
   void initState() {
@@ -94,7 +95,7 @@ class CameraState extends State<Camera> {
   }
 
   Future onFabClick(BuildContext context) async {
-    playSound();
+    await playSound();
 
     try {
       await _initializeControllerFuture;
@@ -106,15 +107,20 @@ class CameraState extends State<Camera> {
 
       await _controller.takePicture(path);
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => DisplayPicture(imagePath: path),
-        ),
-      );
+      PhotosManager.savePictureToGallery(path);
+//      goToNextScreen(context, path);
     } catch (e) {
       print(e);
     }
+  }
+
+  void goToNextScreen(BuildContext context, String path) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DisplayPicture(imagePath: path),
+      ),
+    );
   }
 
   void onCameraSelected(CameraDescription camera) {

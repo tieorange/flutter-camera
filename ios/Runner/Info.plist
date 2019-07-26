@@ -41,6 +41,8 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>Camera is needed to take pictures</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>To save a picture we need access to gallery</string>
 	<key>LSApplicationCategoryType</key>
 	<string></string>
 	<key>UIViewControllerBasedStatusBarAppearance</key>

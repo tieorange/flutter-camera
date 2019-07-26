@@ -26,6 +26,7 @@ dependencies:
   path_provider:
   path:
   audioplayers:
+  image_gallery_saver:
 
 dev_dependencies:
   flutter_test:
