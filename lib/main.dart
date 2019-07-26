@@ -8,6 +8,8 @@ import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
 import 'package:audioplayers/audio_cache.dart';
 
+import 'utils/Constants.dart';
+
 // TODO add sounds: http://soundbible.com/tags-cat-meow.html
 
 Future<void> main() async {
@@ -39,6 +41,7 @@ class Camera extends StatefulWidget {
 class CameraState extends State<Camera> {
   CameraController _controller;
   Future<void> _initializeControllerFuture;
+  AudioCache player = new AudioCache();
 
   @override
   void initState() {
@@ -49,6 +52,10 @@ class CameraState extends State<Camera> {
     );
 
     onCameraSelected(widget.camera);
+  }
+
+  Future playSound() async {
+    await player.play(Constants.sounds.first); // todo mock
   }
 
   @override
@@ -80,28 +87,34 @@ class CameraState extends State<Camera> {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.camera_alt),
         onPressed: () async {
-          try {
-            await _initializeControllerFuture;
-
-            final path = join(
-              (await getTemporaryDirectory()).path,
-              '${DateTime.now()}.png',
-            );
-
-            await _controller.takePicture(path);
-
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => DisplayPicture(imagePath: path),
-              ),
-            );
-          } catch (e) {
-            print(e);
-          }
+          await onFabClick(context);
         },
       ),
     );
+  }
+
+  Future onFabClick(BuildContext context) async {
+    playSound();
+
+    try {
+      await _initializeControllerFuture;
+
+      final path = join(
+        (await getTemporaryDirectory()).path,
+        '${DateTime.now()}.png',
+      );
+
+      await _controller.takePicture(path);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DisplayPicture(imagePath: path),
+        ),
+      );
+    } catch (e) {
+      print(e);
+    }
   }
 
   void onCameraSelected(CameraDescription camera) {
