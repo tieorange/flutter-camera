@@ -73,11 +73,18 @@ class CameraState extends State<Camera> {
         future: _initializeControllerFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            return Row(
+            return Flex(
+              direction: Axis.vertical,
               children: <Widget>[
-                AspectRatio(
-                    aspectRatio: _controller.value.aspectRatio,
-                    child: CameraPreview(_controller))
+                Expanded(
+                  child: AspectRatio(
+                      aspectRatio: _controller.value.aspectRatio,
+                      child: CameraPreview(_controller)),
+                ),
+                FloatingActionButton(
+                  child: Icon(Icons.volume_up),
+                  onPressed: playSound,
+                )
               ],
             );
           } else {
@@ -114,6 +121,13 @@ class CameraState extends State<Camera> {
     }
   }
 
+  MaterialButton buildMaterialButton() {
+    return MaterialButton(
+      child: Text("take pic"),
+      onPressed: () => print("clicked"),
+    );
+  }
+
   void goToNextScreen(BuildContext context, String path) {
     Navigator.push(
       context,
@@ -128,12 +142,5 @@ class CameraState extends State<Camera> {
       print("INIT Initialized camera");
       setState(() {});
     });
-  }
-
-  MaterialButton buildMaterialButton() {
-    return MaterialButton(
-      child: Text("take pic"),
-      onPressed: () => print("clicked"),
-    );
   }
 }
