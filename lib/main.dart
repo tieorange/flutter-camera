@@ -44,6 +44,9 @@ class CameraState extends State<Camera> {
   Future<void> _initializeControllerFuture;
   AudioCache player = new AudioCache(prefix: "audio/");
 
+  bool loading = false;
+  String lastPicturePath = "";
+
   @override
   void initState() {
     super.initState();
@@ -52,11 +55,11 @@ class CameraState extends State<Camera> {
       ResolutionPreset.low,
     );
 
-    onCameraSelected(widget.camera);
+    initCamera(widget.camera);
   }
 
   Future playSound() async {
-    await player.play(Constants.sounds.first); // todo mock
+    await player.play(Constants.sounds.elementAt(1)); // todo mock
   }
 
   @override
@@ -65,10 +68,41 @@ class CameraState extends State<Camera> {
     super.dispose();
   }
 
+  void initCamera(CameraDescription camera) {
+    _initializeControllerFuture = _controller.initialize().then((value) {
+      print("INIT Initialized camera");
+      setState(() {});
+    });
+  }
+
+  Future onFabClick(BuildContext context) async {
+    setState(() {
+      loading = true;
+    });
+
+//    await _initializeControllerFuture;
+
+    final path = join(
+      (await getTemporaryDirectory()).path,
+      '${DateTime.now()}.png',
+    );
+
+    await _controller.takePicture(path);
+
+    PhotosManager.savePictureToGallery(path);
+//      goToNextScreen(context, path);
+    setState(() {
+      loading = false;
+      lastPicturePath = path;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final deviceRatio = size.width / size.height;
+
     return Scaffold(
-      appBar: AppBar(title: Text('Take a Picture2')),
       body: FutureBuilder<void>(
         future: _initializeControllerFuture,
         builder: (context, snapshot) {
@@ -77,13 +111,13 @@ class CameraState extends State<Camera> {
               direction: Axis.vertical,
               children: <Widget>[
                 Expanded(
-                  child: AspectRatio(
-                      aspectRatio: _controller.value.aspectRatio,
-                      child: CameraPreview(_controller)),
-                ),
-                FloatingActionButton(
-                  child: Icon(Icons.volume_up),
-                  onPressed: playSound,
+                  child: Transform.scale(
+                    scale: _controller.value.aspectRatio / deviceRatio,
+                    child: Center(
+                        child: AspectRatio(
+                            aspectRatio: _controller.value.aspectRatio,
+                            child: CameraPreview(_controller))),
+                  ),
                 )
               ],
             );
@@ -92,33 +126,37 @@ class CameraState extends State<Camera> {
           }
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.camera_alt),
-        onPressed: () async {
-          await onFabClick(context);
-        },
+      floatingActionButton: Opacity(
+        opacity: 0.5,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: <Widget>[
+            FloatingActionButton(
+              child: Icon(Icons.camera_alt),
+              onPressed: () => onFabClick(context),
+            ),
+            FloatingActionButton(
+              child: Icon(Icons.volume_up),
+              onPressed: playSound,
+            ),
+            takenPhotoPreview()
+          ],
+        ),
       ),
     );
   }
 
-  Future onFabClick(BuildContext context) async {
-    await playSound();
+  Widget takenPhotoPreview() {
+    Widget image = Image.network(
+        "https://avatars0.githubusercontent.com/u/22935389?s=460&v=4");
 
-    try {
-      await _initializeControllerFuture;
-
-      final path = join(
-        (await getTemporaryDirectory()).path,
-        '${DateTime.now()}.png',
-      );
-
-      await _controller.takePicture(path);
-
-      PhotosManager.savePictureToGallery(path);
-//      goToNextScreen(context, path);
-    } catch (e) {
-      print(e);
+    if (loading) {
+      image = RefreshProgressIndicator();
     }
+    return FloatingActionButton(
+      child: ClipRRect(borderRadius: BorderRadius.circular(40.0), child: image),
+      onPressed: playSound,
+    );
   }
 
   MaterialButton buildMaterialButton() {
@@ -135,12 +173,5 @@ class CameraState extends State<Camera> {
         builder: (context) => DisplayPicture(imagePath: path),
       ),
     );
-  }
-
-  void onCameraSelected(CameraDescription camera) {
-    _initializeControllerFuture = _controller.initialize().then((value) {
-      print("INIT Initialized camera");
-      setState(() {});
-    });
   }
 }
