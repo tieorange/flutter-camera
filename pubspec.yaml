@@ -24,13 +24,13 @@ dependencies:
   cupertino_icons: ^0.1.2
   camera:
   path_provider: 1.2.0
-  path: 1.6.4
+  path: 1.6.2
   audioplayers:
   image_gallery_saver:
 
 dev_dependencies:
-#  flutter_test:
-#    sdk: flutter
+  flutter_test:
+    sdk: flutter
 
 
 # For information on the generic Dart part of this file, see the
