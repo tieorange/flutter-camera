@@ -1,13 +1,15 @@
 import 'dart:async';
-import 'dart:io';
 
+import 'package:audioplayers/audio_cache.dart';
 import 'package:camera/camera.dart';
 import 'package:camera_app/display.dart';
 import 'package:camera_app/utils/PhotosManager.dart';
+import 'package:camera_app/utils/Utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:lamp/lamp.dart';
 import 'package:path/path.dart' show join;
 import 'package:path_provider/path_provider.dart';
-import 'package:audioplayers/audio_cache.dart';
 
 import 'utils/Constants.dart';
 
@@ -16,6 +18,8 @@ import 'utils/Constants.dart';
 Future<void> main() async {
   final cameras = await availableCameras();
   final firstCamera = cameras.first; // TODO handle both cams
+
+  await Utils.initAppCenter();
 
   runApp(
     MaterialApp(
@@ -52,7 +56,7 @@ class CameraState extends State<Camera> {
     super.initState();
     _controller = CameraController(
       widget.camera,
-      ResolutionPreset.low,
+      ResolutionPreset.high,
     );
 
     initCamera(widget.camera);
@@ -139,6 +143,10 @@ class CameraState extends State<Camera> {
               child: Icon(Icons.volume_up),
               onPressed: playSound,
             ),
+            FloatingActionButton(
+              child: Icon(Icons.flash_on),
+              onPressed: blinkFlashlight,
+            ),
             takenPhotoPreview()
           ],
         ),
@@ -147,8 +155,8 @@ class CameraState extends State<Camera> {
   }
 
   Widget takenPhotoPreview() {
-    Widget image = Image.network(
-        "https://avatars0.githubusercontent.com/u/22935389?s=460&v=4");
+    Widget image =
+        FadeInImage.memoryNetwork(placeholder: null, image: lastPicturePath);
 
     if (loading) {
       image = RefreshProgressIndicator();
@@ -173,5 +181,10 @@ class CameraState extends State<Camera> {
         builder: (context) => DisplayPicture(imagePath: path),
       ),
     );
+  }
+
+  Future blinkFlashlight() async {
+    await Lamp.hasLamp;
+    Lamp.turnOn(intensity: 0.1);
   }
 }

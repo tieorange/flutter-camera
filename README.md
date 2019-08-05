@@ -1,3 +1,5 @@
+[![Build status](https://build.appcenter.ms/v0.1/apps/2c0d002a-38ba-49c2-9c61-3d377a6ab8e1/branches/master/badge)](https://appcenter.ms)
+
 # Camera Example
 
 A new Flutter project.

@@ -23,10 +23,19 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
   camera:
+  lamp:
+
+  appcenter:
+  appcenter_analytics:
+  appcenter_crashes:
+
   path_provider: 1.2.0
   path: 1.6.2
   audioplayers:
   image_gallery_saver:
+    git:
+      url: https://github.com/ened/image_gallery_saver
+      ref: swift_version
 
 dev_dependencies:
   flutter_test:
